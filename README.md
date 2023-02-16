@@ -37,7 +37,7 @@ cat("\n\n")
     multinom_mod2 <- multinom(mod2_formula, data = ds)
     print(multinom_res(multinom_mod2, targetVar))}
 
-## Function for getting robust standard error results
+# Function for getting robust standard error results
 logit_res <- function(modfit){modsum <- summary(modfit)
 modsum_tab <- modsum$coefficients
     q.val <- qnorm(0.975)
@@ -52,23 +52,22 @@ modsum_tab <- modsum$coefficients
 
     return(r.est)}
 
-# multinom_res <- function(modfit){
-#   coefs <- exp(coef(modfit))
-#   z <- summary(modfit)$coefficients/summary(modfit)$standard.errors
-#   p <- (1 - pnorm(abs(z), 0, 1)) * 2
-#   return(list(odds_ratio = coefs, p = p))
-# }
+multinom_res <- function(modfit){
+coefs <- exp(coef(modfit))
+z <- summary(modfit)$coefficients/summary(modfit)$standard.errors
+p <- (1 - pnorm(abs(z), 0, 1)) * 2
+return(list(odds_ratio = coefs, p = p))}
 
 multinom_res <- function(modfit, targetVar){
     modSum <- summary(modfit)
     odds_ratios <- exp(modSum$coefficients)
     z <- modSum$coefficients/modSum$standard.errors
     p <- (1 - pnorm(abs(z), 0, 1)) * 2
-    
-    # Match columns with the same starting pattern as the target variable (needed for when target variable is a factor)
+   
+# Match columns with the same starting pattern as the target variable (needed for when target variable is a factor)
     c <- grep(paste0("^", targetVar), colnames(modSum$coefficients), value = TRUE)
     
-    # Get coefficients and standard errors
+# Get coefficients and standard errors
     coefs <- modSum$coefficients[,c]
     ses <- modSum$standard.errors[,c]
     
@@ -85,14 +84,14 @@ multinom_res <- function(modfit, targetVar){
         else{targetVarData <- data.frame(variable = targetVar, response = names(coefs), coefficient = coefs, standard.error = ses, row.names = NULL)}
     
     
-# Calculate the upper and lower limits for the 95% CI of the odds ratio
+## Calculate the upper and lower limits for the 95% CI of the odds ratio
     targetVarData$OR_LL <- exp(targetVarData$coefficient - qnorm(0.975) * targetVarData$standard.error)
     targetVarData$OR_UL <- exp(targetVarData$coefficient + qnorm(0.975) * targetVarData$standard.error)
     targetVarData <- targetVarData[,c('variable','response','OR_LL','OR_UL')]
     return(list(odds_ratio = odds_ratios, p = p, OR_CI = targetVarData))}
 
 mediation <- function(targetVar, mediator, response, ds){
-  # controlVars <- c("ga_NY", "sex", "birth_year", "bpd", "edip_insur")
+  controlVars <- c("ga_NY", "sex", "birth_year", "bpd", "edip_insur")
   fit.mediator <- lm(formula = reformulate(termlabels = c(c("ga_NY", "sex", "birth_year", "bpd", "edip_insur"), mediator), response = targetVar), data = ds)
   
   dv_mod <- reformulate(termlabels = c(targetVar, c("ga_NY", "sex", "birth_year", "bpd", "edip_insur"), mediator), response = response)
