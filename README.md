@@ -64,10 +64,10 @@ multinom_res <- function(modfit, targetVar){
     z <- modSum$coefficients/modSum$standard.errors
     p <- (1 - pnorm(abs(z), 0, 1)) * 2
    
-# Match columns with the same starting pattern as the target variable (needed for when target variable is a factor)
+Match columns with the same starting pattern as the target variable (needed for when target variable is a factor)
     c <- grep(paste0("^", targetVar), colnames(modSum$coefficients), value = TRUE)
     
-# Get coefficients and standard errors
+Get coefficients and standard errors
     coefs <- modSum$coefficients[,c]
     ses <- modSum$standard.errors[,c]
     
@@ -84,7 +84,7 @@ multinom_res <- function(modfit, targetVar){
         else{targetVarData <- data.frame(variable = targetVar, response = names(coefs), coefficient = coefs, standard.error = ses, row.names = NULL)}
     
     
-## Calculate the upper and lower limits for the 95% CI of the odds ratio
+##Calculate the upper and lower limits for the 95% CI of the odds ratio
     targetVarData$OR_LL <- exp(targetVarData$coefficient - qnorm(0.975) * targetVarData$standard.error)
     targetVarData$OR_UL <- exp(targetVarData$coefficient + qnorm(0.975) * targetVarData$standard.error)
     targetVarData <- targetVarData[,c('variable','response','OR_LL','OR_UL')]
